@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PALAY-ALAY | Rice Disease & Pest Diagnostic Website</title>
+  <script src="https://jsdelivr.net" defer></script>
+  <script src="https://jsdelivr.net" defer></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: #dfeccf;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .stage-container {
+      position: relative;
+      width: 100%;
+      max-width: 1080px;
+      margin: auto;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.22);
+      background: #e9f5db;
+    }
+
+    .stage-bg {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* Interactive Hotspot Overlays */
+    .hotspot {
+      position: absolute;
+      background: rgba(118, 184, 67, 0.08);
+      border: 2px solid transparent;
+      border-radius: 999px;
+      cursor: pointer;
+      z-index: 99;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    }
+    .hotspot:hover {
+      background: rgba(118, 184, 67, 0.25);
+      border-color: rgba(75, 124, 38, 0.6);
+    }
+    .hotspot:active {
+      background: rgba(118, 184, 67, 0.45);
+      transform: scale(0.97);
+    }
+
+    /* SCREEN 1: HERO BANNER (bg1.png) */
+    #screen1 { display: block; }
+
+    #btnStart {
+      top: 57.5%;
+      left: 38.0%;
+      width: 23.0%;
+      height: 15.0%;
+    }
+
+    /* SCREEN 2: DIAGNOSIS WORKSPACE (bg2.png) */
+    #screen2 { display: none; }
+
+    .text-overlay {
+      position: absolute;
+      overflow-y: auto;
+      color: #1b3010;
+      z-index: 30;
+      padding: 4px 8px;
+    }
+
+    #diseaseResult {
+      top: 12.2%;
+      left: 14.5%;
+      width: 39.5%;
+      height: 8.8%;
+      display: flex;
+      align-items: center;
+      font-weight: 800;
+      font-size: clamp(12px, 2.0vw, 22px);
+      color: #b71c1c;
+    }
+
+    #chemicalResult {
+      top: 36.2%;
+      left: 2.5%;
+      width: 51.5%;
+      height: 40.5%;
+      font-size: clamp(10.5px, 1.55vw, 16px);
+      line-height: 1.42;
+      white-space: pre-line;
+    }
+
+    .viewer-frame {
+      position: absolute;
+      top: 4.5%;
+      left: 59.8%;
+      width: 37.6%;
+      height: 79.0%;
+      border-radius: 26px;
+      overflow: hidden;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 30;
+    }
+
+    video, img#previewImg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 26px;
+      display: block;
+    }
+
+    #camPrompt {
+      text-align: center;
+      color: #4f772d;
+      font-size: clamp(11px, 1.55vw, 17px);
+      font-weight: bold;
+      padding: 16px;
+      line-height: 1.45;
+    }
+
+    #statusPill {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.95);
+      color: #2e7d32;
+      border: 2px solid #6aa84f;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: clamp(9.5px, 1.25vw, 13px);
+      font-weight: bold;
+      white-space: nowrap;
+      display: none;
+      z-index: 40;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+    }
+
+    #btnScan {
+      top: 89.8%;
+      left: 64.0%;
+      width: 13.8%;
+      height: 7.2%;
+    }
+
+    #btnUploadLabel {
+      top: 89.8%;
+      left: 79.4%;
+      width: 16.0%;
+      height: 7.2%;
+      display: block;
+    }
+
+    #btnAbout {
+      top: 92.8%;
+      left: 1.0%;
+      width: 10.2%;
+      height: 5.8%;
+    }
+
+    input[type="file"] { display: none; }
+
+    /* SCREEN 3: ABOUT & SELECTED DISEASES (bg3.png) */
+    #screen3 { display: none; }
+
+    .disease-hotspot {
+      left: 5.2%;
+      width: 17.5%;
+      height: 4.6%;
+    }
+    #pillBLB { top: 43.6%; }
+    #pillStem { top: 48.8%; }
+    #pillBlast { top: 54.2%; }
+    #pillSheath { top: 59.6%; }
+
+    .back-btn {
+      position: absolute;
+      bottom: 3.5%;
+      right: 3.0%;
+      background: rgba(255, 255, 255, 0.95);
+      color: #2d4f14;
+      border: 3px solid #639a38;
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-family: Georgia, serif;
+      font-weight: bold;
+      font-size: clamp(11px, 1.5vw, 16px);
+      cursor: pointer;
+      z-index: 99;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .back-btn:hover { background: #639a38; color: #ffffff; }
+  </style>
+</head>
+<body>
+
+  <!-- SCREEN 1: START SCREEN (bg1.png) -->
+  <div id="screen1" class="stage-container">
+    <img src="./bg1.png" class="stage-bg" alt="PALAY-ALAY Welcome Screen" />
+    <button type="button" id="btnStart" class="hotspot" onclick="goToScreen('screen2')" title="Click to Start Diagnostics"></button>
+  </div>
+
+  <!-- SCREEN 2: DIAGNOSIS WORKSPACE (bg2.png) -->
+  <div id="screen2" class="stage-container">
+    <img src="./bg2.png" class="stage-bg" alt="PALAY-ALAY Diagnosis Screen" />
+
+    <div id="diseaseResult" class="text-overlay"></div>
+    <div id="chemicalResult" class="text-overlay"></div>
+
+    <div class="viewer-frame" id="cameraBox" onclick="startCamera()">
+      <div id="camPrompt">Tap here to open Rear Camera<br>or tap UPLOAD below</div>
+      <video id="webcam" autoplay playsinline style="display:none;"></video>
+      <img id="previewImg" style="display:none;" alt="Uploaded Rice Sample" />
+      <div id="statusPill">Loading....Initializing</div>
+    </div>
+
+    <button type="button" id="btnScan" class="hotspot" onclick="handleScan()" title="Scan Leaf or Stem"></button>
+    <label id="btnUploadLabel" class="hotspot" for="photoInput" title="Upload Leaf or Stem Photo"></label>
+    <input type="file" id="photoInput" accept="image/*" onchange="handleUpload(event)" />
+
+    <button type="button" id="btnAbout" class="hotspot" onclick="goToScreen('screen3')" title="About PALAY-ALAY"></button>
+  </div>
+
+  <!-- SCREEN 3: ABOUT & SELECTED RICE DISEASES (bg3.png) -->
+  <div id="screen3" class="stage-container">
+    <img src="./bg3.png" class="stage-bg" alt="About PALAY-ALAY" />
+
+    <button type="button" id="pillBLB" class="hotspot disease-hotspot" onclick="loadReference('Bacterial Leaf Blight')" title="Bacterial Leaf Blight"></button>
+    <button type="button" id="pillStem" class="hotspot disease-hotspot" onclick="loadReference('Stemborer')" title="Stemborer"></button>
+    <button type="button" id="pillBlast" class="hotspot disease-hotspot" onclick="loadReference('Rice Blast')" title="Rice Blast"></button>
+    <button type="button" id="pillSheath" class="hotspot disease-hotspot" onclick="loadReference('Sheath Blight')" title="Sheath Blight"></button>
+
+    <button type="button" class="back-btn" onclick="goToScreen('screen2')">← Back to Diagnosis</button>
+  </div>
+
+  <script>
+    const CHEMICAL_TREATMENTS = {
+      "Bacterial Leaf Blight":
+        "• Recommended Bactericide: Copper Hydroxide or Copper Oxychloride.\n" +
+        "• Philippine Brand Examples: Kocide 2000 / Cuproxat.\n" +
+        "• Application Guide: Spray foliar copper-based bactericide (2–3 tbsp per 16L knapsack sprayer) at early symptom onset.\n" +
+        "• Field Advisory: Drain field water for 3–5 days and stop nitrogen (urea) application.",
+
+      "Rice Blast":
+        "• Recommended Fungicide: Tricyclazole, Azoxystrobin, or Isoprothiolane.\n" +
+        "• Philippine Brand Examples: Beam 75 WP / Amistar / Fuji-One.\n" +
+        "• Application Guide: Apply systemic fungicide at booting to heading stage when leaf lesions spread (follow FPA label rate).\n" +
+        "• Safety Advisory: Observe the 14- to 21-day Pre-Harvest Interval (PHI) and keep soil flooded.",
+
+      "Stemborer":
+        "• Recommended Insecticide: Cartap Hydrochloride, Chlorantraniliprole, or Fipronil.\n" +
+        "• Philippine Brand Examples: Padan 50 SP / Prevathon / Regent.\n" +
+        "• Application Guide: Apply targeted granular or foliar insecticide ONLY when deadhearts exceed the 10% action threshold.\n" +
+        "• Safety Advisory: Wear full PPE and conserve natural predators (spiders, wasps).",
+
+      "Sheath Blight":
+        "• Recommended Fungicide: Validamycin, Hexaconazole, or Difenoconazole + Propiconazole.\n" +
+        "• Philippine Brand Examples: Validacin / Anvil / Score.\n" +
+        "• Application Guide: Direct spray toward lower leaf sheaths near the waterline at maximum tillering to booting stage.\n" +
+        "• Field Advisory: Drain field water temporarily to lower canopy humidity.",
+
+      "Healthy":
+        "• NO CHEMICAL TREATMENT REQUIRED.\n" +
+        "• Crop Status: Healthy leaf blade and intact stem detected.\n" +
+        "• Advisory: Do not spray preventive pesticides on healthy crops to preserve beneficial insects and reduce farming costs."
+    };
+
+    let aiModel = null;
+    let activeMode = "none";
+
+    function goToScreen(id) {
+      document.getElementById("screen1").style.display = "none";
+      document.getElementById("screen2").style.display = "none";
+      document.getElementById("screen3").style.display = "none";
+      document.getElementById(id).style.display = "block";
+      window.scrollTo(0, 0);
+    }
+
+    function setStatus(text, isWarn = false) {
+      const pill = document.getElementById("statusPill");
+      pill.style.display = "block";
+      pill.style.color = isWarn ? "#b71c1c" : "#2e7d32";
+      pill.style.borderColor = isWarn ? "#e57373" : "#6aa84f";
+      pill.innerText = text;
+    }
+
+    async function startCamera() {
+      const video = document.getElementById("webcam");
+      const img = document.getElementById("previewImg");
